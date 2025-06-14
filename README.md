@@ -1,4 +1,4 @@
-# 📦 LS.FileReader
+# ![Icon](LS.FileReader/icon.png) LS.FileReader
 
 **A lightweight C# utility to read CSV, Excel (XLSX), and JSON files into strongly-typed models using attribute-based mapping and optional streaming support.**
 
