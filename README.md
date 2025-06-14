@@ -82,6 +82,55 @@ await foreach (var row in reader.ReadAsync<PersonDto>(formFile))
 
 ---
 
+
+### 4. Use `ReadAsync<T>()` + `FileEstimateHelper` for large files (streaming) and batch process
+
+```csharp
+var batch = new List<PersonDto>();
+var batchSize = 100;
+var lastNotifyTime = DateTime.UtcNow;
+var estimatedTotalRows = 0;
+
+await foreach (var row in reader.ReadAsync<PersonDto>(formFile))
+{
+    if (!row.IsSuccess)
+    {
+        Console.WriteLine($"Row {row.RowIndex} failed: {row.Error}");
+        continue;
+    }
+
+    // Estimate total rows once (based on file size and column count)
+    if (estimatedTotalRows == 0)
+    {
+        estimatedTotalRows = FileEstimateHelper.EstimateTotalRows(formFile, row.ColumnCount);
+    }
+
+    batch.Add(row.Data);
+
+    if (batch.Count >= batchSize)
+    {
+        await db.SaveBatchAsync(batch); // Replace with your batch save logic
+        batch.Clear();
+    }
+
+    // Notify progress every 250ms
+    if ((DateTime.UtcNow - lastNotifyTime).TotalMilliseconds >= 250)
+    {
+        double percent = (double)row.RowIndex / estimatedTotalRows * 100;
+        await notifier.SendProgressAsync(connectionId, percent);
+        lastNotifyTime = DateTime.UtcNow;
+    }
+}
+
+// Flush remaining rows
+if (batch.Count > 0)
+{
+    await db.SaveBatchAsync(batch);
+}
+```
+
+---
+
 ## 📂 Supported Formats
 
 | Format  | Method                        | Notes                          |

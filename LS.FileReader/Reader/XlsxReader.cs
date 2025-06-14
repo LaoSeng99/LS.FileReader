@@ -1,12 +1,10 @@
-﻿using System;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using System.Text;
 using ExcelDataReader;
 using LS.FileReader.Helper;
 using LS.FileReader.Interfaces;
 using LS.FileReader.Models;
 using Microsoft.AspNetCore.Http;
-using System.Threading.Tasks;
 
 namespace LS.FileReader.Reader
 {
@@ -87,7 +85,6 @@ namespace LS.FileReader.Reader
             bool headerParsed = false;
             List<string> headers = null;
             int rowIndex = 0;
-            int estimatedTotal = 0;
 
             do
             {
@@ -100,9 +97,7 @@ namespace LS.FileReader.Reader
                         headers = new List<string>();
                         for (int i = 0; i < reader.FieldCount; i++)
                             headers.Add(reader.GetValue(i)?.ToString()?.Trim() ?? string.Empty);
-                        estimatedTotal = FileEstimateHelper.EstimateTotalRows(file, headers.Count);
                         headerParsed = true;
-                        continue;
                     }
 
                     var item = new T();
@@ -133,9 +128,6 @@ namespace LS.FileReader.Reader
                         Data = hasError ? default : item,
                         Error = error
                     };
-
-                    if (FileEstimateHelper.ShouldYield(rowIndex, estimatedTotal))
-                        await Task.Yield();
                 }
             } while (reader.NextResult());
         }

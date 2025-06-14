@@ -1,12 +1,10 @@
-﻿using System;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using System.IO;
 using System.Text;
 using LS.FileReader.Helper;
 using LS.FileReader.Interfaces;
 using LS.FileReader.Models;
 using Microsoft.AspNetCore.Http;
-using System.Threading.Tasks;
 using System.Linq;
 
 namespace LS.FileReader.Reader
@@ -80,7 +78,6 @@ namespace LS.FileReader.Reader
             var headers = headerLine.Split(',').Select(h => h.Trim()).ToList();
             var propMap = PropertyMappingCache.Build<T>();
             int rowIndex = 1;
-            int estimatedTotal = FileEstimateHelper.EstimateTotalRows(file, headers.Count);
 
             while (!reader.EndOfStream)
             {
@@ -116,9 +113,6 @@ namespace LS.FileReader.Reader
                     Data = hasError ? default : item,
                     Error = error
                 };
-
-                if (FileEstimateHelper.ShouldYield(rowIndex, estimatedTotal))
-                    await Task.Yield();
             }
         }
  }

@@ -1,9 +1,11 @@
-﻿using LS.FileReader.Interfaces;
+﻿using LS.FileReader.Helper;
+using LS.FileReader.Interfaces;
 using LS.FileReader.Models;
 using LS.FileReader.Reader;
 using LS.FileReader.Tests.Dtos;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Http.Internal;
+using Moq;
 namespace LS.FileReader.Tests;
 
 public class LsFileReaderTests
@@ -38,6 +40,38 @@ public class LsFileReaderTests
 
         Assert.NotEmpty(rows);
         Assert.Contains(rows, r => r.IsSuccess);
+    }
+
+    [Fact]
+    public async Task Should_Stream_Read_Xlsx()
+    {
+        var file = WrapAsFormFile("Samples/sample-stream.xlsx");
+        var rows = new List<StreamRowResult<TestPerson>>();
+
+
+        await foreach (var row in _reader.ReadAsync<TestPerson>(file))
+            rows.Add(row);
+
+        Assert.NotEmpty(rows);
+        Assert.Contains(rows, r => r.IsSuccess);
+    }
+
+    [Fact]
+    public void Should_Estimate_Total_Rows_Correctly()
+    {
+        // Arrange - 模拟 IFormFile（5000 bytes 大小）
+        var mockFile = new Mock<IFormFile>();
+        mockFile.Setup(f => f.Length).Returns(5000);
+        mockFile.Setup(f => f.FileName).Returns("mock.xlsx");
+
+        int columnCount = 5;
+
+        // Act
+        var estimatedRows = FileEstimateHelper.EstimateTotalRows(mockFile.Object, columnCount);
+
+        // Assert
+        // 计算：5000 / 34 * 1.03 ≈ 151.47 => 152
+        Assert.Equal(152, estimatedRows);
     }
 
     [Fact]
