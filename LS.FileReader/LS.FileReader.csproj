@@ -19,7 +19,6 @@
 	  </Description>
 	  <PackageTags>file-reader;csv;excel;xlsx;json;import;streaming;attribute-mapping</PackageTags>
 	  <PackageLicenseExpression>MIT</PackageLicenseExpression>
-	  <RepositoryUrl>https://github.com/your-org/LS.FileReader</RepositoryUrl>
 	  <Copyright>
 		  Copyright (c) 2025 Laoseng. Built with OpenAI ChatGPT assistance.
 	  </Copyright>
